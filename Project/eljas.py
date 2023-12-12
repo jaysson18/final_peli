@@ -1,4 +1,4 @@
-import config
+
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from geopy import distance
@@ -13,7 +13,7 @@ conn = mysql.connector.connect(
     port=3306,
     database='c_peli',
     user='root',
-    password='exel80jajop',
+    password='rico',
     autocommit=True
 
 
@@ -40,7 +40,13 @@ class Vihu:
         self.sijainti = None
 
 
+class Hyvis:
+    def __init__(self):
+        self.sijainti = None
+
+
 pahis = Vihu()
+hyvis = Hyvis()
 
 climate_temperature = 0
 class Game:
@@ -260,16 +266,17 @@ def get_airports():
 app = Flask(__name__)
 CORS(app)
 
-vastaus = get_airports()
-pahis.sijainti = villain_moves_rounds(vastaus)
-hyvis_sijainti = random.choice(vastaus)
+
 @app.route('/start', methods= ["POST"])
 def start():
+    vastaus = get_airports()
+    pahis.sijainti = villain_moves_rounds(vastaus)
+    hyvis.sijainti = random.choice(vastaus)
 
     response = {
         "lentokentat": vastaus,
         "pahis_sijainti": pahis.sijainti,
-        "hyvis_sijainti": hyvis_sijainti
+        "hyvis_sijainti": hyvis.sijainti
     }
     jsonify(response)
     return response

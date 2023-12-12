@@ -16,20 +16,38 @@ startbutton.addEventListener('click', () => {
   })
       .then(response => response.json())
       .then(data => {
-        for(let i = 0; i <=29; i++) {
-          addMarkers(data.lentokentat[i].latitude_deg, data.lentokentat[i].longitude_deg, i);
+        for(let i = 0; i <= 29; i++) {
+        if(data.lentokentat[i].ident === data.hyvis_sijainti.ident){
+           const marker = L.marker([data.lentokentat[i].latitude_deg, data.lentokentat[i].longitude_deg], { icon: greenIcon }).addTo(map);
+           marker.bindPopup(`<b>You are here: ${data.hyvis_sijainti.airport_name}</b>`);
+           marker.openPopup();
+        }else {
+          const marker = L.marker([data.lentokentat[i].latitude_deg, data.lentokentat[i].longitude_deg]).addTo(map);
+          const popupcontent = document.createElement('div');
+          const h4 = document.createElement('h4');
+          h4.innerHTML = data.lentokentat[i].airport_name;
+          popupcontent.append(h4);
+          const gobutton = document.createElement('button');
+          gobutton.classList.add('button');
+          gobutton.innerHTML = 'fly here';
+          popupcontent.append(gobutton);
+          marker.bindPopup(popupcontent);
+        }
+
         }
       })
   document.getElementById("player-modal").style.display = "none";
 
 })
 
+
 const map = L.map('map', { tap: false });
 L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
   maxZoom: 20,
   subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
 }).addTo(map);
-map.setView([60, 24], 7);
+map.setView([60,24], 7);
+
 
 async function addMarkers(lat, long, index) {
   let marker = "marker" + index;
@@ -56,13 +74,6 @@ document.querySelector('#player-form').addEventListener('submit', function (evt)
   gameSetup(`${apiUrl}newgame?player=${playerName}&loc=${startLoc}`);
 });
 
-// function to fetch data from API
-async function getData(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Invalid server input!');
-  const data = await response.json();
-  return data;
-}
 
 // function to update game status
 function updateStatus(status) {
@@ -125,50 +136,6 @@ function checkGameOver(budget) {
 
 // function to set up game
 // this is the main function that creates the game and calls the other functions
-async function gameSetup(url) {
-  try {
-    document.querySelector('.goal').classList.add('hide');
-    airportMarkers.clearLayers();
-    const gameData = await getData(url);
-    console.log(gameData);
-    updateStatus(gameData.status);
-    if (!checkGameOver(gameData.status.co2.budget)) return;
-    for (let airport of gameData.location) {
-      const marker = L.marker([airport.latitude, airport.longitude]).addTo(map);
-      airportMarkers.addLayer(marker);
-      if (airport.active) {
-        map.flyTo([airport.latitude, airport.longitude], 10);
-        showWeather(airport);
-        checkGoals(airport.weather.meets_goals);
-        marker.bindPopup(`You are here: <b>${airport.name}</b>`);
-        marker.openPopup();
-        marker.setIcon(greenIcon);
-      } else {
-        marker.setIcon(blueIcon);
-        const popupContent = document.createElement('div');
-        const h4 = document.createElement('h4');
-        h4.innerHTML = airport.name;
-        popupContent.append(h4);
-        const goButton = document.createElement('button');
-        goButton.classList.add('button');
-        goButton.innerHTML = 'Fly here';
-        popupContent.append(goButton);
-        const p = document.createElement('p');
-        p.innerHTML = `Distance ${airport.distance}km`;
-        popupContent.append(p);
-        marker.bindPopup(popupContent);
-        goButton.addEventListener('click', function () {
-          gameSetup(`${apiUrl}flyto?game=${gameData.status.id}&dest=${airport.ident}&consumption=${airport.co2_consumption}`);
-        });
-      }
-    }
-    updateGoals(gameData.goals);
-  } catch (error) {
-    console.log(error);
-  }
-}
+
 
 // event listener to hide goal splash
-document.querySelector('.goal').addEventListener('click', function (evt) {
-  evt.currentTarget.classList.add('hide');
-});
