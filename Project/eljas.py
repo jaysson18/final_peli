@@ -18,7 +18,18 @@ conn = mysql.connector.connect(
 
 )
 
+def villain_moves_rounds(player_airports):
+    global villain_location, v_visited_airports
 
+    if not player_airports:
+        print("No airports found in the database.")
+        return
+
+    # Step 2: Randomly select an initial airport for the villain
+    villain_location = random.choice(player_airports)
+    v_visited_airports.add(villain_location['ident'])
+    print(f"Villain is on the run")
+    return villain_location
 
 
 # Global variable for climate temperature
