@@ -2,6 +2,7 @@
 /* 1. show map using Leaflet library. (L comes from the Leaflet library) */
 
 let markercount = 0;
+const greenIcon = L.divIcon({ className: 'green-icon' });
 let markers = [];
 const startbutton = document.getElementById('startButton');
 
@@ -46,7 +47,6 @@ const airportMarkers = L.featureGroup().addTo(map);
 
 // icons
 const blueIcon = L.divIcon({ className: 'blue-icon' });
-const greenIcon = L.divIcon({ className: 'green-icon' });
 
 // form for player name
 document.querySelector('#player-form').addEventListener('submit', function (evt) {

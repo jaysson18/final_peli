@@ -3,7 +3,7 @@ from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 import json
 import random
-import config
+
 
 import mysql.connector
 
@@ -17,6 +17,8 @@ conn = mysql.connector.connect(
 
 
 )
+v_visited_airports = set()
+villain_location = None
 
 def villain_moves_rounds(player_airports):
     global villain_location, v_visited_airports
@@ -34,6 +36,198 @@ def villain_moves_rounds(player_airports):
 
 # Global variable for climate temperature
 climate_temperature = 0
+class Game:
+
+    def __init__(self, conn, cur_airport, p_name):
+        self.game_over = False
+        self.win = False
+        self.all_airports = self.get_airports()
+        self.villain_visited_airports = set()
+        self.villain_location = None
+        self.climate_temperature = 0
+        self.g_id = 0
+        self.conn = conn
+        self.cur_airport = cur_airport
+        self.p_name = p_name
+
+        sql = "INSERT INTO game (location, screen_name) VALUES (%s, %s);"
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(sql, (cur_airport, p_name))
+        self.g_id = cursor.lastrowid
+
+
+        self.villain_moves_rounds(self.all_airports)
+        # start_airport ident
+        current_airport = self.all_airports[0]['ident']
+
+        # game id
+        game_id = self.create_game(self.current_airport, p_name, self.all_airports)
+
+    def get_airports(self):
+        sql = """
+        SELECT airport.iso_country, airport.ident, airport.name AS airport_name, airport.type, airport.latitude_deg, airport.longitude_deg, country.name AS country_name
+        FROM airport
+        JOIN country ON airport.iso_country = country.iso_country
+        WHERE airport.continent = 'EU' 
+        AND airport.type = 'large_airport'
+        AND airport.iso_country != 'RU'
+        ORDER BY RAND()
+        LIMIT 30;
+        """
+
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        return result
+
+    def get_airport_info(self, icao):
+        sql = f'''SELECT airport.iso_country, ident, airport.name AS airport_name, type, latitude_deg, longitude_deg, country.name AS country_name
+        FROM airport
+        JOIN country ON airport.iso_country = country.iso_country
+        WHERE ident = %s'''
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute(sql, (icao,))
+        result = cursor.fetchone()
+        if 'airport_name' not in result or 'country_name' not in result:
+            raise KeyError("Missing keys 'airport_name' and/or 'country_name' in the database result.")
+
+        return result
+
+    def calculate_distance(self, current, target):
+        start = self.get_airport_info(current)
+        end = self.get_airport_info(target)
+        return distance.distance((start['latitude_deg'], start['longitude_deg']),
+                                 (end['latitude_deg'], end['longitude_deg'])).km
+
+    # get airports in range
+    def airports_in_range(self, icao, a_ports):
+        airports_with_country = []
+        for airport in a_ports:
+            airport_info = self.get_airport_info(airport['ident'])
+            airports_with_country.append({
+                'ident': airport['ident'],
+                'name': airport['airport_name'],
+                'distance': self.calculate_distance(icao, airport['ident']),
+                'country': airport_info['country_name']
+            })
+        return airports_with_country
+
+    def villain_moves_rounds(self, player_airports):
+
+        if not player_airports:
+            print("No airports found in the database.")
+            return
+
+        # Step 2: Randomly select an initial airport for the villain
+        self.villain_location = random.choice(player_airports)
+        self.villain_visited_airports.add(self.villain_location['ident'])
+        print(f"Villain is on the run")
+
+    def villain_movement(self):
+
+        # Calculate distances from the villain's current location to all airports
+        distances = []
+        for airport in self.all_airports:
+            if airport['ident'] != self.villain_location['ident'] and airport['ident'] not in self.villain_visited_airports:
+                etäisyys = self.calculate_distance(self.villain_location['ident'], airport['ident'])
+                distances.append((airport, etäisyys))
+
+        # Sort the airports by distance (in ascending order)
+        distances.sort(key=lambda x: x[1])
+
+        # Select the three closest unvisited airports (excluding the current one)
+        closest_unvisited_airports = [airport for airport in distances if
+                                      airport[0]['ident'] not in self.villain_visited_airports][:3]
+
+        if closest_unvisited_airports:
+            # Choose one of the closest unvisited airports randomly
+            chosen_airport = random.choice(closest_unvisited_airports)[0]
+
+            # Update the villain's location to the chosen airport
+            if chosen_airport != self.current_airport:
+                villain_location = chosen_airport
+
+                # Mark the chosen airport as visited
+                self.villain_visited_airports.add(self.villain_location['ident'])
+
+            # print("Villain is now in", villain_location)
+        else:
+            print("The villain has visited all available airports.")
+
+    #def generate_directional_hints(self, player_airport, villain_airport):
+     #   lat_diff = self.villain_airport['latitude_deg'] - self.player_airport['latitude_deg']
+      #  lon_diff = self.villain_airport['longitude_deg'] - self.player_airport['longitude_deg']
+
+       # if lat_diff > 0 and lon_diff > 0:
+        #    return "The villain is to the North-East of you."
+        #elif lat_diff < 0 and lon_diff > 0:
+         #   return "The villain is to the South-East of you."
+        #elif lat_diff > 0 and lon_diff < 0:
+         #   return "The villain is to the North-West of you."
+        #elif lat_diff < 0 and lon_diff < 0:
+         #   return "The villain is to the South-West of you."
+        #else:
+         #   return "You're very close to the villain!"
+
+
+# tick
+    def update_game(self):
+        # get current airport info
+        airport = self.get_airport_info(self.current_airport)
+        # show game status
+        print(f'''You are at {airport['airport_name']}.''')
+        print('You have unlimited range.')
+        print(f"Climate temperature is now +{self.climate_temperature}C.")
+        # pause
+        input('\033[32mPress Enter to continue...\033[0m')
+
+        hint = self.generate_directional_hints(self.get_airport_info(self.current_airport), self.villain_location)
+        print(f"Hint: {hint}")
+
+        # show airports in range. if none, game over
+        airports = self.airports_in_range(self.current_airport, self.all_airports)
+        airports.sort(key=lambda airport: self.calculate_distance(self.current_airport, airport['ident']))
+        print(f'''\033[34mThere are {len(airports)} airports in range: \033[0m''')
+        if len(airports) == 0:
+            print('You are out of range.')
+            game_over = True
+        else:
+            print(f'''Airports: ''')
+            for i, airport in enumerate(airports, start=1):
+                ap_distance = self.calculate_distance(self.current_airport, airport['ident'])
+                print(f'''{i}. {airport['name']}, Country: {airport['country']},  distance: {ap_distance:.0f}km''')
+
+            print(f"Climate temperature is now +{self.climate_temperature}")
+            print(f"Hint: {hint}")
+            dest = int(input('Enter the number of the airport you want to fly to: '))
+            if dest >= 1 and dest <= len(airports):
+                selected_distance = airports[dest - 1]
+                dest = selected_distance['ident']
+                selected_distance = self.calculate_distance(self.current_airport, dest)
+                current_airport = dest
+
+            # Update the climate temperature for every 100km flown
+            while selected_distance >= 100:
+                self.climate_temperature += 0.05
+                selected_distance -= 100
+
+                # Check if the climate temperature has reached a critical point
+                if self.climate_temperature >= 6:
+                    print(f"Climate temperature is now +{self.climate_temperature:.2f}C!")
+                    print("The world has exploded, and you are doomed!")
+                    self.game_over = True
+                    break
+
+            # check if the player's current airport matches the villain's location
+            if self.current_airport == self.villain_location['ident']:
+                print("You found the villain!")
+                self.win = True
+                self.game_over = True
+            else:
+                self.villain_movement()
+
+            # check if the villain has reached a certain location
+# get all goals
 
 
 # FUNCTIONS
@@ -62,7 +256,12 @@ CORS(app)
 @app.route('/start', methods= ["POST"])
 def start():
     vastaus = get_airports()
-    response = jsonify(vastaus)
+    pahis_sijainti = villain_moves_rounds(vastaus)
+    response = {
+        "lentokentat": vastaus,
+        "pahis_sijainti": pahis_sijainti
+    }
+    jsonify(response)
     return response
 
 if __name__ == '__main__':
