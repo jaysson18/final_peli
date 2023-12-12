@@ -17,7 +17,7 @@ startbutton.addEventListener('click', () => {
       .then(response => response.json())
       .then(data => {
         for(let i = 0; i <=29; i++) {
-          addMarkers(data[i].latitude_deg, data[i].longitude_deg, i);
+          addMarkers(data.lentokentat[i].latitude_deg, data.lentokentat[i].longitude_deg, i);
         }
       })
   document.getElementById("player-modal").style.display = "none";
