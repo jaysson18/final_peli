@@ -18,6 +18,7 @@ conn = mysql.connector.connect(
 
 
 )
+
 v_visited_airports = set()
 villain_location = None
 
@@ -34,8 +35,13 @@ def villain_moves_rounds(player_airports):
     print(f"Villain is on the run")
     return villain_location
 
+class Vihu:
+    def __init__(self):
+        self.sijainti = None
 
-# Global variable for climate temperature
+
+pahis = Vihu()
+
 climate_temperature = 0
 class Game:
 
@@ -254,22 +260,26 @@ def get_airports():
 app = Flask(__name__)
 CORS(app)
 
+vastaus = get_airports()
+pahis.sijainti = villain_moves_rounds(vastaus)
+hyvis_sijainti = random.choice(vastaus)
 @app.route('/start', methods= ["POST"])
 def start():
-    vastaus = get_airports()
-    pahis_sijainti = villain_moves_rounds(vastaus)
+
     response = {
         "lentokentat": vastaus,
-        "pahis_sijainti": pahis_sijainti
+        "pahis_sijainti": pahis.sijainti,
+        "hyvis_sijainti": hyvis_sijainti
     }
     jsonify(response)
     return response
 
 
 @app.route('/dircetionalhint/<herolat>/<herolong>', methods = ['GET'])
-def directionalhint(herolat, herolong, villlat, villlong):
-    lat_diff = villlat - herolat
-    lon_diff = villlong - herolong
+def directionalhint(herolat, herolong):
+    lat_diff = pahis.sijainti["latitude_deg"] - herolat
+    lon_diff = pahis.sijainti["longitude_deg"] - herolong
+
 
     if lat_diff > 0 and lon_diff > 0:
         vastaus = "The villain is to the North-East of you."
@@ -370,36 +380,6 @@ def villain_moves_rounds(player_airports):
     print(f"Villain is on the run")
 
 
-def villain_movement():
-    global villain_location
-
-    # Calculate distances from the villain's current location to all airports
-    etäisyydet = []
-    for airport in all_airports:
-        if airport['ident'] != villain_location['ident'] and airport['ident'] not in v_visited_airports:
-            etäisyys = calculate_distance(villain_location['ident'], airport['ident'])
-            etäisyydet.append((airport, etäisyys))
-
-    etäisyydet.sort(key=lambda x: x[1])
-
-    # Select the three closest unvisited airports (excluding the current one)
-    closest_unvisited_airports = [airport for airport in etäisyydet if airport[0]['ident'] not in v_visited_airports][
-                                 :3]
-
-    if closest_unvisited_airports:
-        # Choose one of the closest unvisited airports randomly
-        chosen_airport = random.choice(closest_unvisited_airports)[0]
-
-        # Update the villain's location to the chosen airport
-        if chosen_airport != current_airport:
-            villain_location = chosen_airport
-
-            # Mark the chosen airport as visited
-            v_visited_airports.add(villain_location['ident'])
-
-
-    else:
-        print("The villain has visited all available airports.")
 
 
 def generate_directional_hints(player_airport, villain_airport):
