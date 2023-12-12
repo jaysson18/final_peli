@@ -1,6 +1,7 @@
 import config
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
+from geopy import distance
 import json
 import random
 
@@ -264,11 +265,38 @@ def start():
     jsonify(response)
     return response
 
+
+@app.route('/dircetionalhint/<herolat>/<herolong>', methods = ['GET'])
+def directionalhint(herolat, herolong, villlat, villlong):
+    lat_diff = villlat - herolat
+    lon_diff = villlong - herolong
+
+    if lat_diff > 0 and lon_diff > 0:
+        vastaus = "The villain is to the North-East of you."
+        response = jsonify(vastaus)
+        return response
+    elif lat_diff < 0 and lon_diff > 0:
+         vastaus = "The villain is to the South-East of you."
+         response = jsonify(vastaus)
+         return response
+    elif lat_diff > 0 and lon_diff < 0:
+        vastaus = "The villain is to the North-West of you."
+        response = jsonify(vastaus)
+        return response
+    elif lat_diff < 0 and lon_diff < 0:
+        vastaus = "The villain is to the South-West of you."
+        response = jsonify(vastaus)
+        return response
+    else:
+        vastaus = "You're very close to the villain!"
+        response = jsonify(vastaus)
+        return response
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
-
-# get all goals
 
 # create new game
 """def create_game(cur_airport, p_name, a_ports):
