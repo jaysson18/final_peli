@@ -181,9 +181,9 @@ class Game:
 
 
 # tick
-    def update_game(self):
+    def update_game():
         # get current airport info
-        airport = self.get_airport_info(self.current_airport)
+        airport = peli.get_airport_info(self.current_airport)
         # show game status
         print(f'''You are at {airport['airport_name']}.''')
         print('You have unlimited range.')
@@ -263,7 +263,6 @@ def get_airports():
     result = cursor.fetchall()
     return result
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -312,6 +311,31 @@ def directionalhint(herolat, herolong):
         vastaus = "You're very close to the villain!"
         response = jsonify(vastaus)
         return response
+
+@app.route('/flyTo/<float:lat>/<float:long>')
+def flyTo(lat, long):
+    sql = "SELECT airport.iso_country, airport.ident, airport.name AS airport_name, airport.type, airport.latitude_deg, airport.longitude_deg, country.name AS country_name"
+    sql += " FROM airport"
+    sql += " JOIN country ON airport.iso_country = country.iso_country"
+    sql += " WHERE airport.continent = 'EU'"
+    sql += " AND airport.type = 'large_airport'"
+    sql += f" AND airport.latitude_deg = {lat} "
+    sql += f" AND airport.longitude_deg = {long}"
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    hyvis.sijainti = result
+    print(hyvis.sijainti)
+    print(kentät.all_airports)
+
+    response = {
+        "lentokentat": kentät.all_airports,
+        "pahis_sijainti": pahis.sijainti,
+        "hyvis_sijainti": hyvis.sijainti
+    }
+    jsonify(response)
+    return response
 
 
 

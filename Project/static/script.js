@@ -3,7 +3,22 @@
 
 let greenIcon = L.divIcon({ className: 'green-icon' });
 let markers = [];
+let playerName = "";
 const startbutton = document.getElementById('startButton');
+let marker = "";
+async function removemarkers(){
+   for (let marker of markers) {
+    marker.remove();
+}}
+console.log(markers)
+
+
+const map = L.map('map', { tap: false });
+L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+}).addTo(map);
+map.setView([60,24], 7);
 
 
 startbutton.addEventListener('click', (event) => {
@@ -88,19 +103,12 @@ startbutton.addEventListener('click', (event) => {
 
 
 
-async function addMarkers(lat, long, index) {
-  let marker = "marker" + index;
-  markers[marker];
-  markers[index] = L.marker([lat, long]).addTo(map);
-  markercount += 1;
-}
-
 
 // global variables
-const apiUrl = 'http://127.0.0.1:5000/';
-const startLoc = 'EFHK';
-const globalGoals = [];
-const airportMarkers = L.featureGroup().addTo(map);
+    const apiUrl = 'http://127.0.0.1:5000/';
+    const startLoc = 'EFHK';
+    const globalGoals = [];
+    const airportMarkers = L.featureGroup().addTo(map);
 
 // icons
     const blueIcon = L.divIcon({className: 'blue-icon'});
