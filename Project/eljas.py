@@ -11,7 +11,7 @@ import mysql.connector
 conn = mysql.connector.connect(
     host='localhost',
     port=3306,
-    database='c_peli',
+    database='flight_game',
     user='root',
     password='rico',
     autocommit=True
@@ -43,25 +43,22 @@ class Vihu:
 class Hyvis:
     def __init__(self):
         self.sijainti = None
+        self.nimi = None
 
 
-pahis = Vihu()
-hyvis = Hyvis()
 
 climate_temperature = 0
 class Game:
 
-    def __init__(self, conn, cur_airport, p_name):
+    def __init__(self):
         self.game_over = False
         self.win = False
-        self.all_airports = self.get_airports()
+        self.all_airports = None
         self.villain_visited_airports = set()
         self.villain_location = None
         self.climate_temperature = 0
         self.g_id = 0
         self.conn = conn
-        self.cur_airport = cur_airport
-        self.p_name = p_name
 
         sql = "INSERT INTO game (location, screen_name) VALUES (%s, %s);"
         cursor = conn.cursor(dictionary=True)
@@ -242,9 +239,13 @@ class Game:
             # check if the villain has reached a certain location
 # get all goals
 
-
+class Kentat:
+    def __init__(self):
+        self.all_airports = None
 # FUNCTIONS
-
+pahis = Vihu()
+hyvis = Hyvis()
+kentät = Kentat()
 # select 30 airports for the game
 def get_airports():
     sql = "SELECT airport.iso_country, airport.ident, airport.name AS airport_name, airport.type, airport.latitude_deg, airport.longitude_deg, country.name AS country_name"
@@ -270,11 +271,14 @@ CORS(app)
 @app.route('/start', methods= ["POST"])
 def start():
     vastaus = get_airports()
+    kentät.all_airports = vastaus
     pahis.sijainti = villain_moves_rounds(vastaus)
     hyvis.sijainti = random.choice(vastaus)
+    print(hyvis.sijainti)
+    print(kentät.all_airports)
 
     response = {
-        "lentokentat": vastaus,
+        "lentokentat": kentät.all_airports,
         "pahis_sijainti": pahis.sijainti,
         "hyvis_sijainti": hyvis.sijainti
     }
@@ -282,11 +286,11 @@ def start():
     return response
 
 
-@app.route('/dircetionalhint/<herolat>/<herolong>', methods = ['GET'])
-def directionalhint(herolat, herolong):
-    lat_diff = pahis.sijainti["latitude_deg"] - herolat
-    lon_diff = pahis.sijainti["longitude_deg"] - herolong
 
+@app.route('/directionalhint/<float:herolat>/<float:herolong>', methods = ['GET'])
+def directionalhint(herolat, herolong):
+    lat_diff = pahis.sijainti['latitude_deg'] - herolat
+    lon_diff = pahis.sijainti['longitude_deg'] - herolong
 
     if lat_diff > 0 and lon_diff > 0:
         vastaus = "The villain is to the North-East of you."
@@ -342,7 +346,7 @@ WHERE ident = %s'''
     return result
 
 
-# check if airport has a goal
+
 
 # calculate distance between two airports
 def calculate_distance(current, target):
