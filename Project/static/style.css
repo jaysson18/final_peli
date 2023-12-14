@@ -267,9 +267,17 @@ main {
     padding: 5px;
 }
 
-#restart-game-loss-2 {
+#about-button-lose {
     border-radius: 15px;
     padding: 5px;
+    margin: 5px;
+}
+
+    #about-button-win {
+    border-radius: 15px;
+    padding: 5px;
+    margin: 5px;
+
 }
 
 .done {
@@ -376,7 +384,6 @@ main {
     background-image: -o-linear-gradient(top, rgb(0, 0, 0), rgb(33, 33, 33));
     background-image: -ms-linear-gradient(top, rgb(0, 0, 0), rgb(33, 33, 33));
     background-image: linear-gradient(top, rgb(0, 0, 0), rgb(33, 33, 33));
-    animation: loader @time linear;
 }
 
 .meter {
@@ -386,7 +393,6 @@ main {
     font-size: 2em;
     margin-top: .3em;
     color: #ff0000;
-    animation: meter @time linear;
     text-shadow: 0 -1px 0 #333;
 
     &:after {
@@ -394,26 +400,8 @@ main {
     }
 }
 
-@keyframes loader {
-    0% {
-        width: 100%
-    }
-    100% {
-        width: 0%;
-    }
-}
 
-@keyframes meter {
-    0% {
-        color: rgb(91, 216, 255);
-    }
-    100% {
-        color: #ff0000;
-    }
-}
 
-/* Decoration */
-@import url("https://fonts.googleapis.com/css?family=Give+You+Glory|Exo:800");
 
 
 #wrapper {
