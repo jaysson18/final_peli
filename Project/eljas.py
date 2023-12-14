@@ -273,14 +273,14 @@ def start():
     kentät.all_airports = vastaus
     pahis.sijainti = villain_moves_rounds(vastaus)
     hyvis.sijainti = random.choice(vastaus)
-    print(hyvis.sijainti)
-    print(kentät.all_airports)
+
 
     response = {
         "lentokentat": kentät.all_airports,
         "pahis_sijainti": pahis.sijainti,
         "hyvis_sijainti": hyvis.sijainti
     }
+    print(response)
     jsonify(response)
     return response
 
@@ -325,19 +325,21 @@ def flyTo(lat, long):
     cursor = conn.cursor(dictionary=True)
     cursor.execute(sql)
     result = cursor.fetchall()
-    hyvis.sijainti = result
+    hyvis.sijainti = result[0] if result else hyvis.sijainti  # Update only if an airport is found
     print(hyvis.sijainti)
-    print(kentät.all_airports)
+    return hyvis.sijainti
 
+
+
+@app.route('/update_data')
+def update_data():
     response = {
         "lentokentat": kentät.all_airports,
         "pahis_sijainti": pahis.sijainti,
         "hyvis_sijainti": hyvis.sijainti
     }
-    jsonify(response)
-    return response
 
-
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
