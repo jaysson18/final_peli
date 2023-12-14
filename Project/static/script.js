@@ -33,29 +33,11 @@ startbutton.addEventListener('click', (event) => {
   })
   .then(response => response.json())
   .then(data => {
+      console.log(data)
     createmarker();
 
-    const heroLocation = {
-      latitude: data.hyvis_sijainti.latitude_deg,
-      longitude: data.hyvis_sijainti.longitude_deg,
-      icao: data.hyvis_sijainti.ident,
-      country: data.hyvis_sijainti.country_name,
-      name: data.hyvis_sijainti.airport_name
-    };
-    document.getElementById('player-location').innerHTML = `Airport name : ${heroLocation.name}`
 
-    // Fetch directional hints using heroLocation...
-    fetch(`http://127.0.0.1:5000/directionalhint/${heroLocation.latitude}/${heroLocation.longitude}`, {
-      method: 'GET',
-      headers: {
-        'Content-type': 'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('direction').innerHTML = data
 
-    });
 
   document.getElementById("player-modal").style.display = "none";
 });
@@ -65,18 +47,19 @@ startbutton.addEventListener('click', (event) => {
  async function createmarker() {
     try {
         airportMarkers.clearLayers();
-        const data = await update_data()
+        const data = await fetchUpdateData();
+        fetchDirectionalHint();
         let hyvis = data.hyvis_sijainti
         for (let airport of data.lentokentat) {
 
             const marker = L.marker([airport.latitude_deg, airport.longitude_deg]).addTo(map);
-            console.log( airport.ident)
-            console.log(`hyvis:${hyvis.ident}`);
 
             if (airport.ident === hyvis.ident) {
                 marker.bindPopup(`<b>You are here: ${airport.airport_name}</b>`).openPopup();
                 marker.openPopup();
                 marker.setIcon(greenIcon);
+                document.getElementById('player-location').innerHTML = `Airport name : ${airport.airport_name}`
+
             } else {
                 marker.setIcon(blueIcon);
                 const popupcontent = document.createElement('div');
@@ -90,9 +73,9 @@ startbutton.addEventListener('click', (event) => {
                 marker.bindPopup(popupcontent);
 
                 gobutton.addEventListener('click', () => {
-                    updateGame(airport.latitude_deg, airport.longitude_deg)
+                    updateGame(airport.ident)
                         .then(() => {
-                         createmarker(airport.latitude_deg, airport.longitude_deg);
+                         createmarker();
                              })
                                 .catch(error => console.error("Error in updating game:", error));
 });
@@ -107,7 +90,7 @@ startbutton.addEventListener('click', (event) => {
 }
 
 
-async function update_data() {
+async function fetchUpdateData() {
     try {
         const response = await fetch('http://127.0.0.1:5000/update_data', {
             method: 'GET',
@@ -121,17 +104,37 @@ async function update_data() {
         }
 
         const data = await response.json();
-        console.log(data)
-        return data;  // Palauttaa datan, jota käytetään funktion kutsujan toimesta
+        console.log(data);
+        return data;
     } catch (error) {
-        console.error("Error in update_data:", error);
-        return null;  // Palauttaa null, jos tapahtuu virhe
+        console.error("Error in fetchUpdateData:", error);
+        return null;
+    }
+}
+async function fetchDirectionalHint() {
+    try {
+        const hintResponse = await fetch('http://127.0.0.1:5000/directionalhint', {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json'
+            }
+        });
+
+        if (!hintResponse.ok) {
+            throw new Error(`HTTP error! Status: ${hintResponse.status}`);
+        }
+
+        const hintData = await hintResponse.json();
+        document.getElementById('direction').innerHTML = hintData;
+    } catch (error) {
+        console.error("Error in fetchDirectionalHint:", error);
     }
 }
 
-  async function updateGame(lat, long) {
+
+  async function updateGame(ident) {
   try {
-    const response = await fetch('http://127.0.0.1:5000/flyTo/' + lat + '/' + long, {
+    const response = await fetch(`http://127.0.0.1:5000/flyTo/${ident}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'

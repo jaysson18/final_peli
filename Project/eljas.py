@@ -1,10 +1,8 @@
-
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from geopy import distance
 import json
 import random
-
 
 import mysql.connector
 
@@ -16,28 +14,16 @@ conn = mysql.connector.connect(
     password='rico',
     autocommit=True
 
-
 )
 
 v_visited_airports = set()
 villain_location = None
 
-def villain_moves_rounds(player_airports):
-    global villain_location, v_visited_airports
-
-    if not player_airports:
-        print("No airports found in the database.")
-        return
-
-    # Step 2: Randomly select an initial airport for the villain
-    villain_location = random.choice(player_airports)
-    v_visited_airports.add(villain_location['ident'])
-    print(f"Villain is on the run")
-    return villain_location
 
 class Vihu:
     def __init__(self):
         self.sijainti = None
+        self.visited_airports = None
 
 
 class Hyvis:
@@ -46,8 +32,9 @@ class Hyvis:
         self.nimi = None
 
 
-
 climate_temperature = 0
+
+
 class Game:
 
     def __init__(self):
@@ -64,7 +51,6 @@ class Game:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(sql, (cur_airport, p_name))
         self.g_id = cursor.lastrowid
-
 
         self.villain_moves_rounds(self.all_airports)
         # start_airport ident
@@ -138,7 +124,8 @@ class Game:
         # Calculate distances from the villain's current location to all airports
         distances = []
         for airport in self.all_airports:
-            if airport['ident'] != self.villain_location['ident'] and airport['ident'] not in self.villain_visited_airports:
+            if airport['ident'] != self.villain_location['ident'] and airport[
+                'ident'] not in self.villain_visited_airports:
                 etäisyys = self.calculate_distance(self.villain_location['ident'], airport['ident'])
                 distances.append((airport, etäisyys))
 
@@ -164,23 +151,22 @@ class Game:
         else:
             print("The villain has visited all available airports.")
 
-    #def generate_directional_hints(self, player_airport, villain_airport):
-     #   lat_diff = self.villain_airport['latitude_deg'] - self.player_airport['latitude_deg']
-      #  lon_diff = self.villain_airport['longitude_deg'] - self.player_airport['longitude_deg']
+    # def generate_directional_hints(self, player_airport, villain_airport):
+    #   lat_diff = self.villain_airport['latitude_deg'] - self.player_airport['latitude_deg']
+    #  lon_diff = self.villain_airport['longitude_deg'] - self.player_airport['longitude_deg']
 
-       # if lat_diff > 0 and lon_diff > 0:
-        #    return "The villain is to the North-East of you."
-        #elif lat_diff < 0 and lon_diff > 0:
-         #   return "The villain is to the South-East of you."
-        #elif lat_diff > 0 and lon_diff < 0:
-         #   return "The villain is to the North-West of you."
-        #elif lat_diff < 0 and lon_diff < 0:
-         #   return "The villain is to the South-West of you."
-        #else:
-         #   return "You're very close to the villain!"
+    # if lat_diff > 0 and lon_diff > 0:
+    #    return "The villain is to the North-East of you."
+    # elif lat_diff < 0 and lon_diff > 0:
+    #   return "The villain is to the South-East of you."
+    # elif lat_diff > 0 and lon_diff < 0:
+    #   return "The villain is to the North-West of you."
+    # elif lat_diff < 0 and lon_diff < 0:
+    #   return "The villain is to the South-West of you."
+    # else:
+    #   return "You're very close to the villain!"
 
-
-# tick
+    # tick
     def update_game():
         # get current airport info
         airport = peli.get_airport_info(self.current_airport)
@@ -237,15 +223,23 @@ class Game:
                 self.villain_movement()
 
             # check if the villain has reached a certain location
+
+
 # get all goals
 
 class Kentat:
     def __init__(self):
         self.all_airports = None
+        self.määränpää = None
+        self.lämpötila = 0
+
+
 # FUNCTIONS
 pahis = Vihu()
 hyvis = Hyvis()
 kentät = Kentat()
+
+
 # select 30 airports for the game
 def get_airports():
     sql = "SELECT airport.iso_country, airport.ident, airport.name AS airport_name, airport.type, airport.latitude_deg, airport.longitude_deg, country.name AS country_name"
@@ -257,37 +251,42 @@ def get_airports():
     sql += " ORDER BY RAND()"
     sql += " LIMIT 30;"
 
-
     cursor = conn.cursor(dictionary=True)
     cursor.execute(sql)
     result = cursor.fetchall()
     return result
 
+
+def calculate_distance():
+    return distance.distance((hyvis.sijainti['latitude_deg'], hyvis.sijainti['longitude_deg']),
+                             (kentät.määränpää['latitude_deg'], kentät.määränpää['longitude_deg'])).km
+
+
 app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/start', methods= ["POST"])
+@app.route('/start', methods=["POST"])
 def start():
     vastaus = get_airports()
     kentät.all_airports = vastaus
-    pahis.sijainti = villain_moves_rounds(vastaus)
     hyvis.sijainti = random.choice(vastaus)
-
+    pahis.sijainti = random.choice(vastaus)
 
     response = {
         "lentokentat": kentät.all_airports,
         "pahis_sijainti": pahis.sijainti,
         "hyvis_sijainti": hyvis.sijainti
     }
-    print(response)
+
     jsonify(response)
     return response
 
 
-
-@app.route('/directionalhint/<float:herolat>/<float:herolong>', methods = ['GET'])
-def directionalhint(herolat, herolong):
+@app.route('/directionalhint', methods=['GET'])
+def directionalhint():
+    herolat = hyvis.sijainti['latitude_deg']
+    herolong = hyvis.sijainti['longitude_deg']
     lat_diff = pahis.sijainti['latitude_deg'] - herolat
     lon_diff = pahis.sijainti['longitude_deg'] - herolong
 
@@ -296,9 +295,9 @@ def directionalhint(herolat, herolong):
         response = jsonify(vastaus)
         return response
     elif lat_diff < 0 and lon_diff > 0:
-         vastaus = "The villain is to the South-East of you."
-         response = jsonify(vastaus)
-         return response
+        vastaus = "The villain is to the South-East of you."
+        response = jsonify(vastaus)
+        return response
     elif lat_diff > 0 and lon_diff < 0:
         vastaus = "The villain is to the North-West of you."
         response = jsonify(vastaus)
@@ -312,23 +311,60 @@ def directionalhint(herolat, herolong):
         response = jsonify(vastaus)
         return response
 
-@app.route('/flyTo/<float:lat>/<float:long>')
-def flyTo(lat, long):
+
+@app.route('/flyTo/<ident>')
+def flyTo(ident):
     sql = "SELECT airport.iso_country, airport.ident, airport.name AS airport_name, airport.type, airport.latitude_deg, airport.longitude_deg, country.name AS country_name"
     sql += " FROM airport"
     sql += " JOIN country ON airport.iso_country = country.iso_country"
     sql += " WHERE airport.continent = 'EU'"
     sql += " AND airport.type = 'large_airport'"
-    sql += f" AND airport.latitude_deg = {lat} "
-    sql += f" AND airport.longitude_deg = {long}"
+    sql += " AND airport.ident = %s"  # Käytä paikkamerkkiä
 
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(sql)
+    cursor.execute(sql, (ident,))  # Välitä ident turvallisesti
     result = cursor.fetchall()
-    hyvis.sijainti = result[0] if result else hyvis.sijainti  # Update only if an airport is found
-    print(hyvis.sijainti)
-    return hyvis.sijainti
+    kentät.määränpää = result[0]
 
+    kuljettumatka = calculate_distance()  # lasketaan matka kahden pisteen välillä
+
+    hyvis.sijainti = result[0] if result else hyvis.sijainti  # sijainti päivitetään vasta matkan laskemisen jälkeen
+    return jsonify(kuljettumatka)
+
+@app.route('/updateTemperature/<int:temperatureChange>')
+def updateTemperature(temperatureChange):
+    kentät.lämpötila += temperatureChange
+    print(kentät.lämpötila)
+
+
+
+@app.route('/isGameOver')
+def isGameOver():
+    game_over = False
+    condition = None
+
+    if hyvis.sijainti == pahis.sijainti:
+        response = {
+            "game": "over",
+            "condition": "win-catched"
+        }
+        jsonify(response)
+        return response
+
+    elif kentät.lämpötila == 6:
+        response = {
+            "game": "over",
+            "condition": "lost-temp"
+        }
+        jsonify(response)
+        return response
+
+    response = {
+        "game": "over" if game_over else "ongoing",
+        "condition": condition
+    }
+    jsonify(response)
+    return response
 
 
 @app.route('/update_data')
@@ -341,9 +377,9 @@ def update_data():
 
     return jsonify(response)
 
+
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 # create new game
 """def create_game(cur_airport, p_name, a_ports):
@@ -374,12 +410,7 @@ WHERE ident = %s'''
 
 
 
-# calculate distance between two airports
-def calculate_distance(current, target):
-    start = get_airport_info(current)
-    end = get_airport_info(target)
-    return distance.distance((start['latitude_deg'], start['longitude_deg']),
-                             (end['latitude_deg'], end['longitude_deg'])).km
+ calculate distance between two airports
 
 
 # get airports in range
