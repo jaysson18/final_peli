@@ -147,3 +147,51 @@ async function fetchDirectionalHint() {
     throw error; // You can handle errors appropriately here
   }
 }
+
+async function updateTemperature(tempChange) {
+     fetch('http://127.0.0.1:5000/updateTemperature/' + tempChange, {
+        method: 'GET',
+         headers: {
+            'Content-type': 'application/json'
+         }
+
+     })
+
+}
+
+
+async function isGameOver() {
+    fetch('http://127.0.0.1:5000/isGameOver', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.game === "over") {
+                if (data.condition === "win-catched") {
+                    document.getElementById('win-modal').style.display = "flex";
+                } else if (data.condition === "lost-temp") {
+                    document.getElementById('youlost-modal').style.display = "flex";
+                } else if (data.condition === "lost-villain-visitedall") {
+                    document.getElementById('youlost-modal-2').style.display = "flex";
+                }
+            }
+        })
+        .catch(error => console.error("Error in isGameOver:", error));
+}
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+    document.getElementById('restart-game-win').addEventListener('click', restartGame);
+    document.getElementById('restart-game-loss').addEventListener('click', restartGame);
+    document.getElementById('restart-game-loss-2').addEventListener('click', restartGame);
+});
+
+function restartGame() {
+    document.getElementById('win-modal').style.display = 'none';
+    document.getElementById('youlost-modal').style.display = 'none';
+    document.getElementById('youlost-modal-2').style.display = 'none';
+
+    window.location.reload();
+}

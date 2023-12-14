@@ -177,6 +177,75 @@ main {
     z-index: 9999;
 }
 
+#youlost-modal {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 0;
+    z-index: 9999;
+    display: none;
+}
+
+#youlost-modal-2 {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 0;
+    z-index: 9999;
+    display: none;
+}
+
+#win-modal {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 0;
+    z-index: 9999;
+    display: none;
+}
+
+#youlost-header {
+    display: flex;
+    width: 50%;
+    margin: 4rem auto;
+    flex-direction: column;
+}
+
+#youlost-header-2 {
+    display: flex;
+    width: 50%;
+    margin: 4rem auto;
+    flex-direction: column;
+}
+
+#win-header {
+    display: flex;
+    width: 50%;
+    margin: 4rem auto;
+    flex-direction: column;
+}
+
+#youlost-header p {
+    padding: 1rem;
+    background: white;
+    border-radius: 15px;
+}
+
+#youlost-header-2 p {
+    padding: 1rem;
+    background: white;
+    border-radius: 15px;
+}
+
+#win-header p {
+    padding: 1rem ;
+    background: white;
+    border-radius: 15px;
+}
+
 #player-form {
     display: flex;
     width: 50%;
@@ -186,6 +255,21 @@ main {
 
 #player-form input {
     padding: 1rem;
+}
+
+#restart-game-win {
+    border-radius: 15px;
+    padding: 5px;
+}
+
+#restart-game-loss {
+    border-radius: 15px;
+    padding: 5px;
+}
+
+#restart-game-loss-2 {
+    border-radius: 15px;
+    padding: 5px;
 }
 
 .done {
