@@ -205,13 +205,11 @@ async function isGameOver() {
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('restart-game-win').addEventListener('click', restartGame);
     document.getElementById('restart-game-loss').addEventListener('click', restartGame);
-    document.getElementById('restart-game-loss-2').addEventListener('click', restartGame);
 });
 
 function restartGame() {
     document.getElementById('win-modal').style.display = 'none';
     document.getElementById('youlost-modal').style.display = 'none';
-    document.getElementById('youlost-modal-2').style.display = 'none';
 
     window.location.reload();
 }
