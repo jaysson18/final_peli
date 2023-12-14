@@ -5,6 +5,7 @@ let greenIcon = L.divIcon({ className: 'green-icon' });
 let markers = [];
 let playerName = "";
 const startbutton = document.getElementById('startButton');
+let climate_temperature = 0;
 
 const blueIcon = L.divIcon({className: 'blue-icon'});
 
@@ -141,7 +142,11 @@ async function fetchDirectionalHint() {
       }
     });
     const data = await response.json(); // Add await here
-    return data;
+      await isGameOver()
+      console.log(data);
+      climate_temperature += 0.05 * data/100;;
+      updateTemperature(climate_temperature);
+
   } catch (error) {
     console.error('Error:', error);
     throw error; // You can handle errors appropriately here
