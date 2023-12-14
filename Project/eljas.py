@@ -9,9 +9,9 @@ import mysql.connector
 conn = mysql.connector.connect(
     host='localhost',
     port=3306,
-    database='c_peli',
+    database='flight_game',
     user='root',
-    password='exel80jajop',
+    password='rico',
     autocommit=True
 
 )
@@ -272,6 +272,7 @@ def start():
     kentät.all_airports = vastaus
     hyvis.sijainti = random.choice(vastaus)
     pahis.sijainti = random.choice(vastaus)
+    kentät.lämpötila = 0
 
     response = {
         "lentokentat": kentät.all_airports,
