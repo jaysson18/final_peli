@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"/>
     <link href="../static/style.css" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" defer></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons/dist/ionicons/ionicons.esm.js" defer></script>
@@ -18,110 +18,112 @@
 </head>
 
 <body>
-    <div class="container">
-        <header class="page-header">
-            <h1 class="page-title">
-                Lento&nbsp;peli&nbsp;
-            </h1>
+<div class="container">
+    <header class="page-header">
+        <h1 class="page-title">
+            Lento&nbsp;peli&nbsp;
+        </h1>
 
-            <nav>
-                <ul class="flex-wrap space-evenly">
-                    <li>
-                        <a class="button button-white" href="index.html">Game</a>
-                    </li>
-                    <li>
-                        <a class="button button-white" href="about.html">About</a>
-                    </li>
-                </ul>
-            </nav>
-        </header>
+        <nav>
+            <ul class="flex-wrap space-evenly">
+                <li>
+                    <a class="button button-white" href="index.html">Game</a>
+                </li>
+                <li>
+                    <a class="button button-white" href="about.html">About</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-        <main class="flex-wrap">
-            <div id="map">
+    <main class="flex-wrap">
+        <div id="map">
 
-            </div>
-            <div class="boxes">
-                <section class="box">
-                    <header>
-                        <h2>Game Status</h2>
-                    </header>
-                    <table>
-                        <tr>
-                            <td colspan="2">
-                                <h3 id="player-name">Player Name</h3>
-                            </td>
-                            <td colspan="4">
-                             <div id="wrapper">
+        </div>
+        <div class="boxes">
+            <section class="box">
+                <header>
+                    <h2>Game Status</h2>
+                </header>
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <h3 id="player-name">Player Name</h3>
+                        </td>
+                        <td colspan="4">
+                            <div id="wrapper">
                                 <div class="loader-container">
-                                    <div class="meter">0</div>
+                                    <div class="meter">0°C</div>
                                     <span class="runner"></span>
                                 </div>
                             </div>
                         </td>
-                        </tr>
-                        <tr>
-                        </tr>
-                    </table>
-                </section>
-                <section class="box">
-                    <header>
-                        <h2 id="airport-name">Your are here</h2>
-                    </header>
-                    <table id="playerloc">
-                        <tr>
-                            <td id="player-location">Location</td>
-                        </tr>
-                    </table>
-                </section>
-                <section class="box">
-                    <header>
-                        <h2>Directional hint</h2>
-                    </header>
-                    <ul id="direction" class="flex-wrap">
-                       <li>
-                       </li>
-                    </ul>
-                </section>
-            </div>
-        </main>
-        <footer class="page-footer">
-            <p>Made by Eljas, Idriz, Sampo ja Janne ©</p>
-        </footer>
-        <div class="goal hide">
-            <h2>Gooooool!!!</h2>
-            <p>
-                <span id="goal-txt">Goals reached!!</span>
-            </p>
+                    </tr>
+                    <tr>
+                    </tr>
+                </table>
+            </section>
+            <section class="box">
+                <header>
+                    <h2 id="airport-name">Your are here</h2>
+                </header>
+                <table id="playerloc">
+                    <tr>
+                        <td id="player-location">Location</td>
+                    </tr>
+                </table>
+            </section>
+            <section class="box">
+                <header>
+                    <h2>Directional hint</h2>
+                </header>
+                <ul id="direction" class="flex-wrap">
+                    <li>
+                    </li>
+                </ul>
+            </section>
         </div>
+    </main>
+    <footer class="page-footer">
+        <p>Made by Eljas, Idriz, Sampo ja Janne ©</p>
+    </footer>
+    <div class="goal hide">
+        <h2>Gooooool!!!</h2>
+        <p>
+            <span id="goal-txt">Goals reached!!</span>
+        </p>
     </div>
+</div>
 
-    <div id="player-modal">
-        <form id="player-form">
-            <input id="player-input" type="text" placeholder="Player name" required>
-            <input type="submit" id="startButton" value="Start game">
-        </form>
-    </div>
+<div id="player-modal">
+    <form id="player-form">
+        <input id="player-input" type="text" placeholder="Player name" required>
+        <input type="submit" id="startButton" value="Start game">
+    </form>
+</div>
 
-    <div id="youlost-modal">
-        <header id="youlost-header">
-            <p id="youlost-p">You lost because temperature went over 6 C and the world exploded. Better luck next time!</p>
-            <button id="restart-game-loss" class="restart-button">Start New Game</button>
-        </header>
-    </div>
 
-    <div id="youlost-modal-2">
-        <header id="youlost-header-2">
-            <p id="youlost-p-2">You lost because the villain visited every airport before you got him! Better luck next time!</p>
-            <button id="restart-game-loss-2" class="restart-button"></button>
-        </header>
-    </div>
+<div id="youlost-modal">
+    <header id="youlost-header">
+        <p id="youlost-p">You lost because temperature went over 6 C and the world exploded. Better luck next time!</p>
+        <button id="restart-game-loss" class="restart-button">Start New Game</button>
+    </header>
+</div>
 
-    <div id="win-modal">
-        <header id="win-header">
-            <p id="win-p">You won! You catched the villain before the world exploded. The world is now safe!</p>
-            <button id="restart-game-win" class="restart-button">Start New Game</button>
-        </header>
-    </div>
+<div id="youlost-modal-2">
+    <header id="youlost-header-2">
+        <p id="youlost-p-2">You lost because the villain visited every airport before you got him! Better luck next
+            time!</p>
+        <button id="restart-game-loss-2" class="restart-button"></button>
+    </header>
+</div>
+
+<div id="win-modal">
+    <header id="win-header">
+        <p id="win-p">You won! You catched the villain before the world exploded. The world is now safe!</p>
+        <button id="restart-game-win" class="restart-button">Start New Game</button>
+    </header>
+</div>
 
 
 </body>

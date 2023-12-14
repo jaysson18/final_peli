@@ -64,15 +64,15 @@ body {
 
 
 .page-footer {
-    background: rgb(23,23,23);
-    background: linear-gradient(0deg, rgba(23,23,23,1) 0%, rgba(101,101,101,1) 14%, rgba(202,202,202,1) 39%, rgba(248,246,246,1) 92%, rgba(248,246,246,1) 100%);
+    background: rgb(23, 23, 23);
+    background: linear-gradient(0deg, rgba(23, 23, 23, 1) 0%, rgba(101, 101, 101, 1) 14%, rgba(202, 202, 202, 1) 39%, rgba(248, 246, 246, 1) 92%, rgba(248, 246, 246, 1) 100%);
     color: var(--black);
     padding: 1rem;
 }
 
 .page-header {
-    background: rgb(23,23,23);
-    background: linear-gradient(180deg, rgba(23,23,23,1) 0%, rgba(101,101,101,1) 14%, rgba(202,202,202,1) 39%, rgba(248,246,246,1) 92%, rgba(248,246,246,1) 100%);
+    background: rgb(23, 23, 23);
+    background: linear-gradient(180deg, rgba(23, 23, 23, 1) 0%, rgba(101, 101, 101, 1) 14%, rgba(202, 202, 202, 1) 39%, rgba(248, 246, 246, 1) 92%, rgba(248, 246, 246, 1) 100%);
     padding: 1rem;
     color: var(--black);
 }
@@ -241,7 +241,7 @@ main {
 }
 
 #win-header p {
-    padding: 1rem ;
+    padding: 1rem;
     background: white;
     border-radius: 15px;
 }
